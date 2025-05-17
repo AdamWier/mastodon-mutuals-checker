@@ -16,13 +16,19 @@ const callAllPages = async (address, allFollowers = []) => {
     return await callAllPages(nextAddress, combinedFollowers)
 }
 
+const getNumberToIgnore = () => {
+    return process.argv[2] ?? 0
+}
+
 const getNonMutualLinks = (nonMutuals) =>{
     const nonMutualsWithLink = nonMutuals.map(person => ({link: `https://mastodon.social/@${person.acct}`, acct:person.acct}));
     let whiteList = getWhiteList();
     const nonMutualsWithoutWhiteList = nonMutualsWithLink.filter(({link}) => !whiteList.some(listItem => listItem === link))
     
     const links = nonMutualsWithoutWhiteList.map(({link, acct}) => `<li><a href="${link}">${acct}</a>`)
-    return links
+    const linksMinusNumberToIgnore = links.slice(getNumberToIgnore())
+    console.log(getNumberToIgnore(), links.length, linksMinusNumberToIgnore.length)
+    return linksMinusNumberToIgnore
 }
 
 const getWhiteList = () => fs.readFileSync("./whitelist.txt", 'utf8').split(/\r?\n|\r|\n/g).filter(Boolean)
